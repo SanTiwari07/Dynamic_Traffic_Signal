@@ -30,7 +30,7 @@ This project simulates a **4-lane traffic intersection** with dynamic traffic si
 \text{Density} = \frac{\text{Vehicle Area Covered}}{\text{Total Lane Area}}
 \]  
 
----
+--
 
 ### 🔹 Dynamic Green Light Rules  
 
@@ -136,30 +136,6 @@ Assume instantaneous density estimates (after smoothing window):
 
 > Note: When *all* approaches are light, the cycle approaches **120s** (≈ **67% faster** than static).  
 > When *all* are saturated, dynamic = static (**360s**) — never worse than static.
-
----
-
-### 📐 Quick Formulas
-
-- **Cycle Time (Static):**  
-  \[
-  C_{\text{static}} = 4 \times 90 = 360 \text{ s}
-  \]
-
-- **Per-Lane Dynamic Time (bounded):**  
-  \[
-  T' = \max\!\big(30,\ \min(90,\ \text{rule-based reduction of remaining time})\big)
-  \]
-
-- **Cycle Time (Dynamic):**  
-  \[
-  C_{\text{dyn}} = \sum_{\text{lanes}} T'_{\text{lane}}
-  \]
-
-- **Efficiency Gain (% faster than static):**  
-  \[
-  \text{Gain} = \frac{C_{\text{static}} - C_{\text{dyn}}}{C_{\text{static}}} \times 100
-  \]
 
 ---
 
