@@ -91,6 +91,88 @@ This project simulates a **4-lane traffic intersection** with dynamic traffic si
 ✅ On average, this system saves **30–60% of cycle time** compared to static signals.  
 
 ---
+## 🆚 Static vs Dynamic (Head-to-Head)
+
+### What’s the difference?
+- **Static signals:** Every lane always gets **90s** green. Total cycle = **360s** (4 × 90).
+- **Dynamic signals (this project):** Each lane starts at **90s**, then adjusts using density rules every 5s after an initial 10s window:
+  - Density < 0.3 → reduce remaining time by **40%**
+  - 0.4 ≤ Density ≤ 0.6 → reduce remaining time by **25%**
+  - Density ≥ 0.7 → **no change**
+  - Bounds: **30s (best case)** to **90s (worst case)** per lane
+
+---
+
+### 📈 Key KPIs
+
+| KPI | Static | Dynamic (Yours) | Why it matters |
+|---|---|---|---|
+| Cycle time (all 4 lanes) | Always **360s** | **120–360s** | Shorter cycles = lower network delay |
+| Lane green time | Fixed **90s** | **30–90s** based on need | Cuts waste on empty/low-traffic lanes |
+| Average wait time | Higher under imbalance | Lower under imbalance | Users wait less when their lane is light |
+| Throughput under uneven load | Limited | Higher | Extra time shifts to busy lanes |
+| Fairness | Equal time, not equal need | Proportional to demand | Matches service to actual traffic |
+| Pedestrian integration | Fixed windows | Can co-schedule | Flexible, safer timing options |
+| Robustness to surges | Poor | Better | Adapts in-cycle to spikes |
+| Implementation complexity | Low | Moderate | Needs vision + logic |
+
+---
+
+### 🔢 Worked Scenario (One Full Cycle)
+
+Assume instantaneous density estimates (after smoothing window):
+
+| Direction | Density | Rule Applied | Green Time |
+|---|---:|---|---:|
+| North | 0.25 | < 0.3 → −40% | 90 × 0.6 = **54s** |
+| South | 0.55 | 0.4–0.6 → −25% | 90 × 0.75 = **67.5s** → **68s** (rounded) |
+| East | 0.72 | ≥ 0.7 → no change | **90s** |
+| West | 0.28 | < 0.3 → −40% | 90 × 0.6 = **54s** |
+
+- **Dynamic cycle** = 54 + 68 + 90 + 54 = **266s**  
+- **Static cycle** = 360s  
+- **Cycle time saved** = 360 − 266 = **94s**  
+- **Efficiency gain** = (94 / 360) × 100 ≈ **26.1% faster** for this cycle
+
+> Note: When *all* approaches are light, the cycle approaches **120s** (≈ **67% faster** than static).  
+> When *all* are saturated, dynamic = static (**360s**) — never worse than static.
+
+---
+
+### 📐 Quick Formulas
+
+- **Cycle Time (Static):**  
+  \[
+  C_{\text{static}} = 4 \times 90 = 360 \text{ s}
+  \]
+
+- **Per-Lane Dynamic Time (bounded):**  
+  \[
+  T' = \max\!\big(30,\ \min(90,\ \text{rule-based reduction of remaining time})\big)
+  \]
+
+- **Cycle Time (Dynamic):**  
+  \[
+  C_{\text{dyn}} = \sum_{\text{lanes}} T'_{\text{lane}}
+  \]
+
+- **Efficiency Gain (% faster than static):**  
+  \[
+  \text{Gain} = \frac{C_{\text{static}} - C_{\text{dyn}}}{C_{\text{static}}} \times 100
+  \]
+
+---
+
+### 🧠 When Dynamic Shines
+- **Uneven demand:** Reallocates green to busy approaches.
+- **Off-peak / night:** Cuts empty-lane green dramatically.
+- **Incidents or temporary surges:** Adapts mid-cycle via sliding averages.
+
+### ⚠️ Edge Cases & Safeguards
+- **Minimum green:** Never drop below **30s** (clearance & pedestrian safety).
+- **Stability:** Use sliding/EMA averages to avoid flapping decisions.
+- **Starvation protection:** Hard cap ensures every lane gets service each cycle.
+
 
 ## 🖥️ Tech Stack  
 - **Python**  
